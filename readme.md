@@ -4,13 +4,13 @@
 - OS: ubuntu Ubuntu 22.04.1 LTS
 - CRI: containerd://1.6.8
 
-# Update OS
+### Update OS
 
 ```bash
-sudo apt update && sudo apt upgrade
+sudo apt update -y && sudo apt upgrade -y
 ```
 
-### containerd 
+### Install containerd
 
 ```bash
 curl -O -JL https://github.com/containerd/containerd/releases/download/v1.6.8/containerd-1.6.8-linux-amd64.tar.gz
@@ -21,11 +21,15 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now containerd
 ```
 
-### runc
+### Install runc
 ```bash
 sudo mkdir -p /usr/local/sbin
 sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64
 sudo chmod a+rx /usr/local/sbin/runc
+```
+
+### Configure containerd to use systemd cgroup
+```
 sudo mkdir -p /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
 sudo vi /etc/containerd/config.toml
@@ -36,12 +40,17 @@ sudo vi /etc/containerd/config.toml
 SystemdCgroup = true
 ...
 ```
-
 ```bash
 sudo systemctl restart containerd
+```
+
+Note: kubelet has to be configured as well later on
+
+### Install crictl
+```bash
 VERSION="v1.25.0"
 curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-${VERSION}-linux-amd64.tar.gz --output crictl-${VERSION}-linux-amd64.tar.gz
-sudo tar zxvf crictl-$VERSION-linux-amd64.tar.gz
+sudo tar Czxvf /usr/local crictl-$VERSION-linux-amd64.tar.gz
 ```
 
 ### OS config
@@ -81,7 +90,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
 
-# Config octavia lb
+# Configure octavia LB
 
 ```bash
 openstack loadbalancer create --name <kube-lb> --flavor small --vip-subnet-id <private_subnet_id>
@@ -128,7 +137,7 @@ apiServer:
   - X.X.X.X       # master_3_private_ip
   - X.X.X.X       # LB public ip
   - X.X.X.X       # LB private ip
-  #- lb-CNAME     # LB DNS record
+  - lb-CNAME      # LB DNS record
 apiVersion: kubeadm.k8s.io/v1beta3
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
@@ -158,7 +167,21 @@ serverTLSBootstrap: true      # for metrics server
 sudo kubeadm init --upload-certs --config kubeadm-config.yaml
 ```
 
-### Join the other master node
+### Approve CSRs
+```bash
+kubectl get csr
+NAME        AGE    SIGNERNAME                                    REQUESTOR               REQUESTEDDURATION   CONDITION
+csr-xxxxx   39m    kubernetes.io/kubelet-serving                 system:node:<master1>   <none>              Pending
+csr-yyyyy   39m    kubernetes.io/kubelet-serving                 system:node:<master1>   <none>              Pending
+...
+```
+Approve each pending csr:
+```bash
+kubectl certificate approve csr-xxxxx csr-yyyyy ...
+```
+
+
+### Join the other master nodes
 ```bash
 # master 2
 sudo kubeadm join <master_1_private_ip>:6443 --token <bootstrap_token> \
@@ -171,4 +194,17 @@ sudo kubeadm join <master_1_private_ip>:6443 --token <bootstrap_token> \
         --discovery-token-ca-cert-hash <sha256:ca> \
         --control-plane --certificate-key <cert_key> \
         --apiserver-advertise-address <master_2_private_ip>
+```
+
+### Approve CSRs
+```bash
+kubectl get csr
+NAME        AGE     SIGNERNAME                                    REQUESTOR                 REQUESTEDDURATION   CONDITION
+csr-mq6c9   80s     kubernetes.io/kubelet-serving                 system:node:<master2>     <none>              Pending
+csr-pdw4k   6m15s   kubernetes.io/kubelet-serving                 system:node:<master3>     <none>              Pending
+...
+```
+Approve each pending csr:
+```bash
+kubectl certificate approve csr-xxxxx csr-yyyyy ...
 ```
