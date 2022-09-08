@@ -73,6 +73,10 @@ EOF
 
 # Apply sysctl params without reboot
 sudo sysctl --system
+
+# Disable swap
+sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
 ```
 
 ### Install kubeadm kubectl and kubelet
@@ -90,7 +94,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
 
-# Configure octavia LB
+### Configure octavia LB
 
 ```bash
 openstack loadbalancer create --name <kube-lb> --flavor small --vip-subnet-id <private_subnet_id>
@@ -106,7 +110,7 @@ openstack loadbalancer member create --subnet-id <private_subnet_id> --address <
 openstack loadbalancer member create --subnet-id <private_subnet_id> --address <master_3_private_ip> --protocol-port 6443 <master-nodes>
 ```
 
-# Create Kubeadm-config.yaml
+### Create Kubeadm-config.yaml
 ```yaml
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
