@@ -23,7 +23,7 @@ And the 3 servers characteristics:
 | Hostname    | Region | Public IP | Private IP |
 | ----------- | ----------- | -- | -- |
 | lejav-scale3-lim | LIM | xxx.xxx.xxx.xxx| 10.119.250.101 |
-| lejav-scale3-sbg | SBG |xxx.xxx.xxx.xxx 10.119.250.102 |
+| lejav-scale3-sbg | SBG |xxx.xxx.xxx.xxx | 10.119.250.102 |
 | lejav-scale3-rbx | RBX | xxx.xxx.xxx.xxx| 10.119.250.103 |
 
 ## OS
