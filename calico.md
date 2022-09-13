@@ -82,6 +82,9 @@ spec:
       natOutgoing: Enabled
       nodeSelector: all()
     # linuxDataplane: BPF
+    bgp: Enabled
+    nodeAddressAutodetectionV4:
+      kubernetes: NodeInternalIP
 
 ---
 # This section configures the Calico API server.

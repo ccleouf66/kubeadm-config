@@ -50,7 +50,7 @@ Note: kubelet has to be configured as well later on
 ```bash
 VERSION="v1.25.0"
 curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-${VERSION}-linux-amd64.tar.gz --output crictl-${VERSION}-linux-amd64.tar.gz
-sudo tar Czxvf /usr/local crictl-$VERSION-linux-amd64.tar.gz
+sudo tar Czxvf /usr/local/bin crictl-$VERSION-linux-amd64.tar.gz
 ```
 
 ### OS config
@@ -156,6 +156,7 @@ kubernetesVersion: 1.25.0
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
+  podSubnet: 192.168.0.0/16
 scheduler: {}
 controlPlaneEndpoint: X.X.X.X:6443   #Private IP of the LB
 
@@ -198,6 +199,28 @@ sudo kubeadm join <master_1_private_ip>:6443 --token <bootstrap_token> \
         --discovery-token-ca-cert-hash <sha256:ca> \
         --control-plane --certificate-key <cert_key> \
         --apiserver-advertise-address <master_2_private_ip>
+```
+
+### Add worker nodes
+
+If you add additional workers after 24h the existing bootstrap token is probably expired. To generate new one:
+
+```bash
+kubeadm token create --print-join-command
+
+kubeadm join <IP_LB>:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<SHA256>
+```
+
+### Configure Node INTERNAL IP
+
+By default, kubelet advertise the interface IP with the default gateway set on it as INTERNAL IP. This INTERNAL IP is used by kube-apiserver when it needs to communicate with the node. To use the private network instead (for security purpose) we can edit kubelet config on each node:
+
+```bash
+sudo vi /var/lib/kubelet/kubeadm-flags.env
+```
+
+```bash
+KUBELET_KUBEADM_ARGS="--node-ip=<PRIVATE IP NODE> --container-runtime=remote --..."
 ```
 
 ### Approve CSRs
