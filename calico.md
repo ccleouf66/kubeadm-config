@@ -95,3 +95,34 @@ metadata:
   name: default 
 spec: {}
 ```
+
+### Check BGP config
+On each node install calicoctl cli:
+```bash
+curl -L https://github.com/projectcalico/calico/releases/download/v3.24.1/calicoctl-linux-amd64 -o calicoctl
+chmod +x ./calicoctl
+```
+
+Then check the BGP status:
+```bash
+sudo ./calicoctl node status
+```
+
+The connexion STATE should be *up*:
+```bash
+Calico process is running.
+
+IPv4 BGP status
++----------------+-------------------+-------+----------+-------------+
+|  PEER ADDRESS  |     PEER TYPE     | STATE |  SINCE   |    INFO     |
++----------------+-------------------+-------+----------+-------------+
+| 10.119.25.18   | node-to-node mesh | up    | 18:59:41 | Established |
+| 10.119.95.181  | node-to-node mesh | up    | 18:59:45 | Established |
+| 10.119.250.101 | node-to-node mesh | up    | 18:59:43 | Established |
+| 10.119.250.103 | node-to-node mesh | up    | 18:59:42 | Established |
+| 10.119.117.234 | node-to-node mesh | up    | 18:59:45 | Established |
++----------------+-------------------+-------+----------+-------------+
+
+IPv6 BGP status
+No IPv6 peers found.
+```
