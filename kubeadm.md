@@ -81,6 +81,10 @@ sudo grep swap /etc/fstab
 ```
 Check that all lines for swap are correctly commented.
 
+Disable IPv6 (optional)  
+It may help to completely disable IPv6. For instance, for Ubuntu 22.04, follow this guide: https://linuxconfig.org/how-to-disable-ipv6-address-on-ubuntu-22-04-lts-jammy-jellyfish.
+
+
 ### Install kubeadm kubectl and kubelet
 ```bash
 sudo apt-get update
