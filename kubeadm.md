@@ -76,8 +76,10 @@ sudo sysctl --system
 
 # Disable swap
 sudo swapoff -a
-sudo sed -i '/ swap / s/^/#/' /etc/fstab
+sudo sed -i '/[^V^I ] swap[^V^I ]/ s/^/#/' /etc/fstab
+sudo grep swap /etc/fstab
 ```
+Check that all lines for swap are correctly commented.
 
 ### Install kubeadm kubectl and kubelet
 ```bash
