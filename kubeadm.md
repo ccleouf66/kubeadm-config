@@ -241,3 +241,11 @@ Approve each pending csr:
 ```bash
 kubectl certificate approve csr-xxxxx csr-yyyyy ...
 ```
+
+### Install the Network plugin
+
+Here, we used Calico as Network plugin solution. You can follow our config in [calico.md](./calico.md).
+
+### Install metrics-server
+
+The Kubernetes metrics-server can be installed usign the official [git repo](https://github.com/kubernetes-sigs/metrics-server)

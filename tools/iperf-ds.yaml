@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: iperf
+spec:
+  selector:
+    matchLabels:
+      name: iperf
+  template:
+    metadata:
+      labels:
+        name: iperf
+    spec:
+      tolerations:
+      # these tolerations are to have the daemonset runnable on control plane nodes
+      # remove them if your control plane nodes should not run pods
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: iperf
+        image: debian:latest
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "apt-get update && apt-get install -y iperf3 && iperf3 -s"
+     

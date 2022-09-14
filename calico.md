@@ -82,6 +82,7 @@ spec:
       natOutgoing: Enabled
       nodeSelector: all()
     # linuxDataplane: BPF
+    mtu: 9000
     bgp: Enabled
     nodeAddressAutodetectionV4:
       kubernetes: NodeInternalIP
@@ -101,6 +102,7 @@ On each node install calicoctl cli:
 ```bash
 curl -L https://github.com/projectcalico/calico/releases/download/v3.24.1/calicoctl-linux-amd64 -o calicoctl
 chmod +x ./calicoctl
+sudo mv ./calicoctl /usr/local/bin/
 ```
 
 Then check the BGP status:
