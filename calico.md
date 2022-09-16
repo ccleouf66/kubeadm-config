@@ -107,7 +107,7 @@ sudo mv ./calicoctl /usr/local/bin/
 
 Then check the BGP status:
 ```bash
-sudo ./calicoctl node status
+sudo calicoctl node status
 ```
 
 The connexion STATE should be *up*:
