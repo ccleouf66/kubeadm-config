@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pvc-perf-test 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      bench: ceph-rbd
+  template:
+    metadata:
+      labels:
+        bench: ceph-rbd
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: bench
+                operator: In
+                values: 
+                - ceph-rbd
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: pvc-perf-test
+        image: debian:latest
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "apt update && apt install -y fio && sleep 3600"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 105Gi
+
