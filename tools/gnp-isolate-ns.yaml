@@ -1,0 +1,39 @@
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: isolate-ns-a
+spec:
+  # Allow communication only inside the namespace.
+  namespaceSelector: projectcalico.org/name == 'ns-a'
+  ingress:
+  - action: Allow
+    source:
+      namespaceSelector: projectcalico.org/name == 'ns-a'
+  egress:
+  # Allow communication only inside the namespace.
+  # No internet access.
+  - action: Allow
+    destination:
+      namespaceSelector: projectcalico.org/name == 'ns-a'
+  # Allow access to CoreDNS pods in kube-system namespace.
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: k8s-app == "kube-dns"
+      namespaceSelector: projectcalico.org/name == 'kube-system'
+      ports:
+      - 53
+  - action: Allow
+    protocol: UDP
+    destination:
+      selector: k8s-app == "kube-dns"
+      namespaceSelector: projectcalico.org/name == 'kube-system'
+      ports:
+      - 53
+  # Allow access to the kube-api server from kubernetes service in the default namespace. Used by operator and controller.
+  - action: Allow
+    destination:
+      services:
+        name: kubernetes
+        namespace: default
