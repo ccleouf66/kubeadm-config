@@ -12,9 +12,13 @@ The configurations are applied on OVHcloud but can be deployed on any other envi
 The Kubernetes cluster is deployed across multiple region to provide HA and fault tolerance.
 
 The solution used are :
-- [Kubeadm to deploye a v1.25.0 Kubernetes cluster](./kubeadm.md)
-- OS ubuntu Ubuntu 22.04.1 LTS
-- [CRI: containerd://1.6.8](./kubeadm.md)
+- [Kubeadm to deploye a v1.27.0 Kubernetes cluster](./kubeadm.md)
+- OS ubuntu Ubuntu 22.04.2 LTS - 5.15.0-75-generic
+- [CRI: containerd://1.7.2](./kubeadm.md)
 - [CNI Calico in BGP mode](./calico.md)
 - Rook Ceph for the storage solution
 - [Network tuning at kernel level to exploit 25gbps](./sd-cross-regions-vrack.md)
+
+# Kubernetes cluster upgrade
+
+Upgrade [v1.26.x -> v1.27.x](./upgrade.md)

@@ -4,9 +4,9 @@
 The objective is to use Calico as Kubernetes network plugin. To provide best performance, following Calico recommendation, BGP mode is choosen without overlay.
 
 ## Environment
-Kubernetes v1.25.0
-Calico 3.24.1
-OS ubuntu Ubuntu 22.04.1 LTS
+Kubernetes v1.27.0
+Calico 3.26.1
+OS ubuntu Ubuntu 22.04.2 LTS
 vRack *pcc145,146,3ds* in CA environment.  
 The dedicated servers are integrated in the vRack.
 The Public Cloud project is integrated in the vRack.
@@ -59,7 +59,7 @@ And the 3 servers characteristics:
 Calico is deployed with de Operator:
 
 ```bash
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
 ```
 
 The following configuration is applied:
@@ -100,7 +100,7 @@ spec: {}
 ### Check BGP config
 On each node install calicoctl cli:
 ```bash
-curl -L https://github.com/projectcalico/calico/releases/download/v3.24.1/calicoctl-linux-amd64 -o calicoctl
+curl -L https://github.com/projectcalico/calico/releases/download/v3.26.1/calicoctl-linux-amd64 -o calicoctl
 chmod +x ./calicoctl
 sudo mv ./calicoctl /usr/local/bin/
 ```

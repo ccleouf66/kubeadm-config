@@ -1,8 +1,8 @@
 # Create a Kubernetes cluster with kubeadm
 
-- Kubernetes version: v1.25.0
-- OS: ubuntu Ubuntu 22.04.1 LTS
-- CRI: containerd://1.6.8
+- Kubernetes version: v1.27.0
+- OS: ubuntu Ubuntu 22.04.2 LTS
+- CRI v1: containerd://1.7.2
 
 ### Update OS
 
@@ -13,8 +13,8 @@ sudo apt update -y && sudo apt upgrade -y
 ### Install containerd
 
 ```bash
-curl -O -JL https://github.com/containerd/containerd/releases/download/v1.6.8/containerd-1.6.8-linux-amd64.tar.gz
-sudo tar Cxzvf /usr/local containerd-1.6.8-linux-amd64.tar.gz
+curl -O -JL https://github.com/containerd/containerd/releases/download/v1.7.2/containerd-1.7.2-linux-amd64.tar.gz
+sudo tar Cxzvf /usr/local containerd-1.7.2-linux-amd64.tar.gz
 sudo mkdir -p /usr/local/lib/systemd/system/
 sudo curl -o /usr/local/lib/systemd/system/containerd.service -JL https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
 sudo systemctl daemon-reload
@@ -24,7 +24,7 @@ sudo systemctl enable --now containerd
 ### Install runc
 ```bash
 sudo mkdir -p /usr/local/sbin
-sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64
+sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.1.7/runc.amd64
 sudo chmod a+rx /usr/local/sbin/runc
 ```
 
@@ -48,7 +48,7 @@ Note: kubelet has to be configured as well later on
 
 ### Install crictl
 ```bash
-VERSION="v1.25.0"
+VERSION="v1.27.0"
 curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-${VERSION}-linux-amd64.tar.gz --output crictl-${VERSION}-linux-amd64.tar.gz
 sudo tar Czxvf /usr/local/bin crictl-$VERSION-linux-amd64.tar.gz
 ```
@@ -90,12 +90,12 @@ It may help to completely disable IPv6. For instance, for Ubuntu 22.04, follow t
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
 
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+sudo curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-get install -y kubelet=1.27.3-00 kubeadm=1.27.3-00 kubectl=1.27.3-00
 sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
@@ -116,7 +116,7 @@ openstack loadbalancer member create --subnet-id <private_subnet_id> --address <
 openstack loadbalancer member create --subnet-id <private_subnet_id> --address <master_3_private_ip> --protocol-port 6443 <master-nodes>
 ```
 
-### Create Kubeadm-config.yaml
+### Create kubeadm-config.yaml
 ```yaml
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
@@ -158,13 +158,13 @@ etcd:
     dataDir: /var/lib/etcd
 imageRepository: registry.k8s.io
 kind: ClusterConfiguration
-kubernetesVersion: 1.25.0
+kubernetesVersion: 1.27.0
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
   podSubnet: 192.168.0.0/16
 scheduler: {}
-controlPlaneEndpoint: X.X.X.X:6443   #Private IP of the LB
+controlPlaneEndpoint: X.X.X.X:6443   # Private IP of the LB. The IP must be reachable by the other nodes to join the cluster.
 
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
