@@ -1,7 +1,7 @@
 # Upgrade a Kubernetes cluster with kubeadm
 
-- Kubernetes version: v1.26.x -> v1.27.x
-- OS: ubuntu Ubuntu 22.04.2 LTS - 5.15.0-75-generic
+- Kubernetes version: v1.27.x -> v1.28.x
+- OS: ubuntu Ubuntu 22.04.2 LTS - 5.15.0-87-generic
 - CRI v1: containerd://1.6.8 -> containerd://1.6.24
 - runc 1.1.4 -> 1.1.9
 
@@ -22,6 +22,22 @@ sudo apt update -y && sudo apt upgrade -y
 ```
 
 ## Upgrade containerd and runc
+
+You can check rommended and compatibility versions for containerd and kubernetes here : https://containerd.io/releases/
+
+Containerd v1.6 is the LTS version (oct. 2023).
+For Kubernetes v1.28 Containerd v1.6.15+ is recommended or v1.7.0+
+
+For production purpose we go with latest Containerd LTS version -> v1.6.24(oct. 2023).
+
+cri-containerd-1.6.24 comme with:
+
+- containerd v1.6.24
+- runc v1.1.9
+- crictl cli
+- ctr cli
+
+If not yet up to date: 
 
 ```bash
 wget https://github.com/containerd/containerd/releases/download/v1.6.24/cri-containerd-1.6.24-linux-amd64.tar.gz
@@ -79,12 +95,15 @@ kubectl uncordon <node-to-uncordon>
 
 ### Upgrade kubeadm (all node)
 ```bash
-sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.27/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.27/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+# update package information & search available kubeadm versions
+sudo apt update
+sudo apt-cache madison kubeadm
 
 sudo apt-mark unhold kubeadm
-sudo apt-get update
-sudo apt-get install -y kubeadm=1.27.6-1.1
+sudo apt-get install -y kubeadm=1.28.3-1.1
 sudo apt-mark hold kubeadm
 kubeadm version
 ```
@@ -97,7 +116,7 @@ sudo kubeadm upgrade plan
 
 Validate the target versions and proceed to the upgrade:
 ```bash
-sudo kubeadm upgrade apply v1.27.6
+sudo kubeadm upgrade apply v1.28.3
 ```
 
 ### Upgrade control plan components (other master only)
@@ -115,7 +134,7 @@ You can start on 3 master nodes and finally upgrade worker nodes one by one with
 ```bash
 sudo apt-mark unhold kubelet kubectl
 sudo apt-get update
-sudo apt-get install -y kubelet=1.27.6-1.1 kubectl=1.27.6-1.1
+sudo apt-get install -y kubelet=1.28.3-1.1 kubectl=1.28.3-1.1
 sudo apt-mark hold kubelet kubectl
 ```
 Restart the kubelet:
@@ -145,12 +164,12 @@ kubectl drain <node-to-drain> --ignore-daemonsets --delete-emptydir-data
 ### Update kubelet & kubeadmkuebct  
 
 ```bash
-sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.27/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.27/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-sudo apt-mark unhold kubeadm kubelet
 sudo apt-get update
-sudo apt-get install -y kubeadm=1.27.6-1.1 kubelet=1.27.6-1.1
+sudo apt-mark unhold kubeadm kubelet
+sudo apt-get install -y kubeadm=1.28.3-1.1 kubelet=1.28.3-1.1
 sudo apt-mark hold kubeadm kubelet
 ```
 
