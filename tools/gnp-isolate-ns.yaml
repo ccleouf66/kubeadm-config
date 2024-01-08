@@ -8,11 +8,18 @@ spec:
   namespaceSelector: projectcalico.org/name == 'ns-a'
   ingress:
   - action: Allow
+<<<<<<< HEAD
     #protocol: TCP
     source:
       namespaceSelector: projectcalico.org/name == 'ns-a'
   egress:
   # Allow communication only inside the namespace. 
+=======
+    source:
+      namespaceSelector: projectcalico.org/name == 'ns-a'
+  egress:
+  # Allow communication only inside the namespace.
+>>>>>>> 681ca99259a834c431d31e8b4864c59b147787e7
   # No internet access.
   - action: Allow
     destination:
@@ -21,7 +28,11 @@ spec:
   - action: Allow
     protocol: TCP
     destination:
+<<<<<<< HEAD
       selector: k8s-app == "kube-dns" 
+=======
+      selector: k8s-app == "kube-dns"
+>>>>>>> 681ca99259a834c431d31e8b4864c59b147787e7
       namespaceSelector: projectcalico.org/name == 'kube-system'
       ports:
       - 53
@@ -37,4 +48,8 @@ spec:
     destination:
       services:
         name: kubernetes
+<<<<<<< HEAD
         namespace: default
+=======
+        namespace: default
+>>>>>>> 681ca99259a834c431d31e8b4864c59b147787e7

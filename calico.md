@@ -128,3 +128,7 @@ IPv4 BGP status
 IPv6 BGP status
 No IPv6 peers found.
 ```
+
+### Security policies
+
+Calico GlobalNetworkPolicy to isolate a namespace : [template](./tools/gnp-isolate-ns.yaml).
