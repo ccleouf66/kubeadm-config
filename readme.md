@@ -16,5 +16,5 @@ The solution used are :
 - OS ubuntu Ubuntu 22.04.1 LTS
 - [CRI: containerd://1.6.8](./kubeadm.md)
 - [CNI Calico in BGP mode](./calico.md)
-- Rook Ceph for the storage solution
+- [Rook Ceph for the storage solution](./rook-ceph/rook-ceph.md)
 - [Network tuning at kernel level to exploit 25gbps](./sd-cross-regions-vrack.md)
