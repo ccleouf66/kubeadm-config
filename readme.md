@@ -16,9 +16,14 @@ The solution used are :
 - OS ubuntu Ubuntu 22.04.2 LTS - 5.15.0-87-generic
 - [CRI: containerd://1.6.24](./kubeadm.md)
 - [CNI Calico in BGP mode](./calico.md)
+<<<<<<< HEAD
 - Rook Ceph for the storage solution
 - [Network tuning at kernel level to exploit 25gbps](./sd-cross-regions-vrack.md)
 
 # Kubernetes cluster upgrade
 
 Upgrade [v1.27.x -> v1.28.x](./upgrade.md)
+=======
+- [Rook Ceph for the storage solution](./rook-ceph/rook-ceph.md)
+- [Network tuning at kernel level to exploit 25gbps](./sd-cross-regions-vrack.md)
+>>>>>>> main

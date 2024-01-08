@@ -1,0 +1,68 @@
+crds:
+  # -- Whether the helm chart should create and update the CRDs. If false, the CRDs must be
+  # managed independently with deploy/examples/crds.yaml.
+  # **WARNING** Only set during first deployment. If later disabled the cluster may be DESTROYED.
+  # If the CRDs are deleted in this case, see
+  # [the disaster recovery guide](https://rook.io/docs/rook/latest/Troubleshooting/disaster-recovery/#restoring-crds-after-deletion)
+  # to restore them.
+  enabled: true
+
+# -- Pod resource requests & limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# -- Global log level for the operator.
+# Options: `ERROR`, `WARNING`, `INFO`, `DEBUG`
+logLevel: INFO
+
+# Settings for whether to disable the drivers or other daemons if they are not
+# needed
+csi:
+  serviceMonitor:
+    namespace: mon
+    # -- Enable ServiceMonitor for Ceph CSI drivers
+    enabled: true
+    # -- Service monitor scrape interval
+    interval: 5s
+    # -- ServiceMonitor additional labels
+    labels:
+      release: mon
+  
+  # -- Enable Ceph CSI Liveness sidecar deployment
+  enableLiveness: true
+
+  topology:
+    # -- Enable topology based provisioning
+    enabled: true
+    # NOTE: the value here serves as an example and needs to be
+    # updated with node labels that define domains of interest
+    # -- domainLabels define which node labels to use as domains
+    # for CSI nodeplugins to advertise their domains
+    domainLabels:
+    - kubernetes.io/hostname
+    - topology.kubernetes.io/zone
+    - topology.kubernetes.io/region
+
+  readAffinity:
+    # -- Enable read affinity for RBD volumes. Recommended to
+    # set to true if running kernel 5.8 or newer.
+    # @default -- `false`
+    enabled: true
+    # -- Define which node labels to use
+    # as CRUSH location. This should correspond to the values set
+    # in the CRUSH map.
+    # @default -- labels listed [here](../CRDs/Cluster/ceph-cluster-crd.md#osd-topology)
+    crushLocationLabels:
+    - topology.kubernetes.io/region
+    - topology.kubernetes.io/zone
+
+monitoring:
+  # -- Enable monitoring. Requires Prometheus to be pre-installed.
+  # Enabling will also create RBAC rules to allow Operator to create ServiceMonitors
+  enabled: true
+
