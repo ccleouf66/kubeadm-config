@@ -1,8 +1,8 @@
 # Create a Kubernetes cluster with kubeadm
 
-- Kubernetes version: v1.25.0
-- OS: ubuntu Ubuntu 22.04.1 LTS
-- CRI: containerd://1.6.8
+- Kubernetes version: v1.32.0
+- OS: ubuntu Ubuntu 24.04.1 LTS
+- CRI: containerd://2.0.1
 
 ### Update OS
 
@@ -13,8 +13,8 @@ sudo apt update -y && sudo apt upgrade -y
 ### Install containerd
 
 ```bash
-curl -O -JL https://github.com/containerd/containerd/releases/download/v1.6.8/containerd-1.6.8-linux-amd64.tar.gz
-sudo tar Cxzvf /usr/local containerd-1.6.8-linux-amd64.tar.gz
+curl -O -JL https://github.com/containerd/containerd/releases/download/v2.0.1/containerd-2.0.1-linux-amd64.tar.gz
+sudo tar Cxzvf /usr/local containerd-2.0.1-linux-amd64.tar.gz
 sudo mkdir -p /usr/local/lib/systemd/system/
 sudo curl -o /usr/local/lib/systemd/system/containerd.service -JL https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
 sudo systemctl daemon-reload
@@ -24,7 +24,7 @@ sudo systemctl enable --now containerd
 ### Install runc
 ```bash
 sudo mkdir -p /usr/local/sbin
-sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64
+sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.2.4/runc.amd64
 sudo chmod a+rx /usr/local/sbin/runc
 ```
 
@@ -35,9 +35,12 @@ sudo containerd config default | sudo tee /etc/containerd/config.toml
 sudo vi /etc/containerd/config.toml
 ```
 
+Add the following line: `SystemdCgroup = true`
+
 ```yaml
 ...
-SystemdCgroup = true
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.runc.options]
+  SystemdCgroup = true
 ...
 ```
 ```bash
@@ -48,7 +51,7 @@ Note: kubelet has to be configured as well later on
 
 ### Install crictl
 ```bash
-VERSION="v1.25.0"
+VERSION="v1.32.0"
 curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-${VERSION}-linux-amd64.tar.gz --output crictl-${VERSION}-linux-amd64.tar.gz
 sudo tar Czxvf /usr/local/bin crictl-$VERSION-linux-amd64.tar.gz
 ```
@@ -87,16 +90,19 @@ It may help to completely disable IPv6. For instance, for Ubuntu 22.04, follow t
 
 ### Install kubeadm kubectl and kubelet
 ```bash
+
 sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl
+# apt-transport-https may be a dummy package; if so, you can skip that package
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
+sudo systemctl enable --now kubelet
 ```
 
 
@@ -119,7 +125,7 @@ openstack loadbalancer member create --subnet-id <private_subnet_id> --address <
 ### Create Kubeadm-config.yaml
 ```yaml
 ---
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
@@ -136,7 +142,9 @@ nodeRegistration:
   criSocket: unix:///var/run/containerd/containerd.sock
   imagePullPolicy: IfNotPresent
   name: master-1
-  taints: null
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
 
 ---
 apiServer:
@@ -148,7 +156,7 @@ apiServer:
   - X.X.X.X       # LB public ip
   - X.X.X.X       # LB private ip
   - lb-CNAME      # LB DNS record
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
 controllerManager: {}
@@ -158,7 +166,7 @@ etcd:
     dataDir: /var/lib/etcd
 imageRepository: registry.k8s.io
 kind: ClusterConfiguration
-kubernetesVersion: 1.25.0
+kubernetesVersion: 1.32.0
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
@@ -171,6 +179,15 @@ apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
 cgroupDriver: systemd
 serverTLSBootstrap: true      # for metrics server
+systemReserved:
+  cpu: 500m
+  memory: 512mi
+kubeReserved:
+  cpu: 500m
+  memory: 2G
+cpuManagerPolicy: static
+cpuManagerPolicyOptions:
+  full-pcpus-only: "true"
 ```
 
 ### Init cluster on first nodes only
@@ -206,6 +223,8 @@ sudo kubeadm join <master_1_private_ip>:6443 --token <bootstrap_token> \
         --control-plane --certificate-key <cert_key> \
         --apiserver-advertise-address <master_2_private_ip>
 ```
+
+sudo kubeadm join 192.0.0.1:6443 --token rjtt1p.vwny2zxwr94hex48 --discovery-token-ca-cert-hash sha256:12b04a890791dd71669536f39ace5c7a3273e3a80840f201611d7613f6a56177 --control-plane --apiserver-advertise-address 192.0.0.3 --certificate-key 5bd7fdb4e8d1eb59e43988abc0317a4e2ca5620f94273d73a828977efded8421
 
 ### Add worker nodes
 
