@@ -1,8 +1,8 @@
 # Create a Kubernetes cluster with kubeadm
 
-- Kubernetes version: v1.32.0
+- Kubernetes version: v1.34.1
 - OS: ubuntu Ubuntu 24.04.1 LTS
-- CRI: containerd://2.0.1
+- CRI: containerd://2.1.4
 
 ### Update OS
 
@@ -13,8 +13,8 @@ sudo apt update -y && sudo apt upgrade -y
 ### Install containerd
 
 ```bash
-curl -O -JL https://github.com/containerd/containerd/releases/download/v2.0.1/containerd-2.0.1-linux-amd64.tar.gz
-sudo tar Cxzvf /usr/local containerd-2.0.1-linux-amd64.tar.gz
+curl -O -JL https://github.com/containerd/containerd/releases/download/v2.1.4/containerd-2.1.4-linux-amd64.tar.gz
+sudo tar Cxzvf /usr/local containerd-2.1.4-linux-amd64.tar.gz
 sudo mkdir -p /usr/local/lib/systemd/system/
 sudo curl -o /usr/local/lib/systemd/system/containerd.service -JL https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
 sudo systemctl daemon-reload
@@ -24,7 +24,7 @@ sudo systemctl enable --now containerd
 ### Install runc
 ```bash
 sudo mkdir -p /usr/local/sbin
-sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.2.4/runc.amd64
+sudo curl -o /usr/local/sbin/runc -JL https://github.com/opencontainers/runc/releases/download/v1.3.1/runc.amd64
 sudo chmod a+rx /usr/local/sbin/runc
 ```
 
@@ -51,7 +51,7 @@ Note: kubelet has to be configured as well later on
 
 ### Install crictl
 ```bash
-VERSION="v1.32.0"
+VERSION="v1.34.0"
 curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-${VERSION}-linux-amd64.tar.gz --output crictl-${VERSION}-linux-amd64.tar.gz
 sudo tar Czxvf /usr/local/bin crictl-$VERSION-linux-amd64.tar.gz
 ```
@@ -95,9 +95,9 @@ sudo apt-get update
 # apt-transport-https may be a dummy package; if so, you can skip that package
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
@@ -166,7 +166,7 @@ etcd:
     dataDir: /var/lib/etcd
 imageRepository: registry.k8s.io
 kind: ClusterConfiguration
-kubernetesVersion: 1.32.0
+kubernetesVersion: 1.34.1
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
