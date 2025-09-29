@@ -173,6 +173,8 @@ networking:
   podSubnet: 192.168.0.0/16
 scheduler: {}
 controlPlaneEndpoint: X.X.X.X:6443   #Private IP of the LB
+proxy:
+  disabled: true                # Disable kube-proxy if install cilium with ebpf
 
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
@@ -181,7 +183,7 @@ cgroupDriver: systemd
 serverTLSBootstrap: true      # for metrics server
 systemReserved:
   cpu: 500m
-  memory: 512mi
+  memory: 512Mi
 kubeReserved:
   cpu: 500m
   memory: 2G
